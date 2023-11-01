@@ -1,7 +1,160 @@
 ﻿@page "/"
+@using Newtonsoft.Json;
+@using QuatroEstacoes.Models;
+@using QuatroEstacoes.Service.Imp;
+@using System.ComponentModel;
+@using QuatroEstacoes.Service;
+@inject IJSRuntime JS;
 
 <PageTitle>Index</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Hello, world!</MudText>
 <MudText Class="mb-8">Welcome to your new app, powered by MudBlazor!</MudText>
 <MudAlert Severity="Severity.Normal">You can find documentation and examples on our website here: <MudLink Href="https://mudblazor.com" Typo="Typo.body2" Color="Color.Inherit"><b>www.mudblazor.com</b></MudLink></MudAlert>
+
+@code{
+    private System.Threading.Timer? timer;
+    private DateTime? expiracao;
+    private static LogSensor novaMed;
+    private System.Timers.Timer aTimer;
+    private bool erro = false;
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public void Atualiza()
+    {
+        // Create a timer and set a two second interval.
+        aTimer = new System.Timers.Timer();
+        aTimer.Interval = 5000;
+
+        // Hook up the Elapsed event for the timer.
+        aTimer.Elapsed += OnTimedEvent;
+
+        // Have the timer fire repeated events (true is the default)
+        aTimer.AutoReset = true;
+
+        // Start the timer
+        aTimer.Enabled = true;
+    }
+
+    private void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e)
+    {
+        Erro = !erro;
+        if (erro == false)
+        {
+        }
+        if (erro == true)
+        {
+        }
+    }
+
+    public bool Erro
+    {
+        get => erro;
+        set
+        {
+            erro = value;
+            RaisePropertyChanged(nameof(Erro));
+        }
+    }
+
+    public void RaisePropertyChanged(string propertyName)
+    {
+        PropertyChangedEventHandler handler = PropertyChanged;
+        if (handler != null)
+        {
+            handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    private void MessageHandler(string msg)
+    {
+        this.InvokeAsync(async () => Atualizatela(msg)); ;
+    }
+
+    public void Atualizatela(string msg)
+    {
+        novaMed = JsonConvert.DeserializeObject<LogSensor>(msg);
+
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        MessageService.OnMessage += MessageHandler;
+        StateHasChanged();
+        try
+        {
+            // atualiza a tela 20s depois de abrir
+            expiracao = DateTime.Now.AddSeconds(20);
+            var running = true;
+
+            int passo = 0;
+
+            timer = new System.Threading.Timer(async (object? stateInfo) =>
+                   {
+                       if (expiracao < DateTime.Now)
+                       {
+                           expiracao = DateTime.Now.AddSeconds(30);
+                           //if ((passo % 2) == 0)
+                           {
+                               await InvokeAsync(StateHasChanged);
+                           }
+
+                           // proximo update
+                           expiracao = DateTime.Now.AddSeconds(15);
+                       }
+                   },
+                new System.Threading.AutoResetEvent(false), 1000, 2000);
+
+            expiracao = DateTime.Now.AddSeconds(-1);
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            //Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+    bool _disposed;
+    public void Dispose() => _disposed = true;
+
+
+    class Message
+    {
+        public DateTime Date { get; set; }
+        public DateTime Date_ { get; set; }
+        public string Text { get; set; }
+    }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IDictionary<string, object> Attributes { get; set; }
+    IList<Message> messages = new List<Message>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            await JS.InvokeVoidAsync("eval", $"document.getElementById('event-console').scrollTop = document.getElementById('event-console').scrollHeight");
+        }
+    }
+
+    void OnClearClick()
+    {
+        Clear();
+    }
+
+    public void Clear()
+    {
+        messages.Clear();
+
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Log(string message)
+    {
+        messages.Add(new Message { Date = DateTime.Now, Date_ = DateTime.Today, Text = message });
+
+        InvokeAsync(StateHasChanged);
+    }
+}

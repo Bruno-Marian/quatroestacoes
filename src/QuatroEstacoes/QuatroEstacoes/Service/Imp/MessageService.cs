@@ -2,7 +2,7 @@
 {
     public class MessageService : IMessageService
     {
-        public event Action<string> OnMessage;
+        public static event Action<string> OnMessage;
 
         public void SendMessage(string message)
         {
