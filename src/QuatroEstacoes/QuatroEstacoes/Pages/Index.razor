@@ -4,22 +4,93 @@
 @using QuatroEstacoes.Service.Imp;
 @using System.ComponentModel;
 @using QuatroEstacoes.Service;
-@inject IJSRuntime JS;
 
 <PageTitle>Index</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Hello, world!</MudText>
 <MudText Class="mb-8">Welcome to your new app, powered by MudBlazor!</MudText>
+@foreach(var message in messages)
+{
+    <MudText>@message.Text</MudText>
+}
 <MudAlert Severity="Severity.Normal">You can find documentation and examples on our website here: <MudLink Href="https://mudblazor.com" Typo="Typo.body2" Color="Color.Inherit"><b>www.mudblazor.com</b></MudLink></MudAlert>
 
 @code{
     private System.Threading.Timer? timer;
     private DateTime? expiracao;
+    private Double xIni;
+    private Double yIni;
+    private Double zIni;
     private static LogSensor novaMed;
     private System.Timers.Timer aTimer;
     private bool erro = false;
 
     public event PropertyChangedEventHandler PropertyChanged;
+
+    async Task OnMarkerClick()
+    {
+        string movimentação = "normal";
+        var message = "";
+        if (novaMed != null)
+        {
+            if (xIni != null)
+            {
+                if (xIni + 2 < novaMed.x)
+                {
+                    movimentação = "Em movimento";
+                }
+                else if (xIni + 2 < novaMed.x)
+                {
+                    movimentação = "Em movimento";
+                }
+                else if (xIni + 2 < novaMed.x)
+                {
+                    movimentação = "Em movimento";
+                }
+                else
+                    movimentação = "normal";
+            }
+            else
+            {
+                xIni = novaMed.x;
+                yIni = novaMed.y;
+                zIni = novaMed.z;
+            }
+
+            if (novaMed.humidityEarth > 0)
+            {
+                message = $"Temperatura:{novaMed.temperature}°C | Umidade:{novaMed.humidity}% | Umidade do Solo: Umido | Posição: {movimentação} |";
+            }
+            else
+                message = $"Temperatura:{novaMed.temperature}°C | Umidade:{novaMed.humidity}% | Umidade do Solo: Seco | Posição: {movimentação} |";
+
+
+        }
+        else
+        {
+            message = $"Sensor inativo";
+        }
+
+        if ((movimentação == "Em movimento") && (novaMed.humidityEarth > 0))
+        {
+            Log("ALERTA o solo está se movendo e está umido");
+        }
+        else
+        {
+            if (movimentação == "Em movimento")
+                Log("Alerta o solo está se movendo");
+            if (novaMed != null && novaMed.humidityEarth > 0)
+                Log("Alerta o solo está umido");
+        }
+
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await OnMarkerClick();
+
+        base.OnInitializedAsync();
+    }
 
     public void Atualiza()
     {
@@ -83,6 +154,7 @@
     {
         MessageService.OnMessage += MessageHandler;
         StateHasChanged();
+
         try
         {
             // atualiza a tela 20s depois de abrir
@@ -130,14 +202,6 @@
     [Parameter(CaptureUnmatchedValues = true)]
     public IDictionary<string, object> Attributes { get; set; }
     IList<Message> messages = new List<Message>();
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-        {
-            await JS.InvokeVoidAsync("eval", $"document.getElementById('event-console').scrollTop = document.getElementById('event-console').scrollHeight");
-        }
-    }
 
     void OnClearClick()
     {
