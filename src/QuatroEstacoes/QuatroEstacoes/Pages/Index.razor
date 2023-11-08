@@ -12,6 +12,8 @@
 @foreach(var message in messages)
 {
     <MudText>@message.Text</MudText>
+
+    <MudText>@msgrecebidas</MudText>
 }
 <MudAlert Severity="Severity.Normal">You can find documentation and examples on our website here: <MudLink Href="https://mudblazor.com" Typo="Typo.body2" Color="Color.Inherit"><b>www.mudblazor.com</b></MudLink></MudAlert>
 
@@ -24,6 +26,8 @@
     private static LogSensor novaMed;
     private System.Timers.Timer aTimer;
     private bool erro = false;
+
+    public string msgrecebidas { get; set; }
 
     public event PropertyChangedEventHandler PropertyChanged;
 
@@ -145,7 +149,9 @@
 
     public void Atualizatela(string msg)
     {
-        novaMed = JsonConvert.DeserializeObject<LogSensor>(msg);
+        msgrecebidas = msg;
+
+        Log(msg);
 
         StateHasChanged();
     }
@@ -155,6 +161,7 @@
         MessageService.OnMessage += MessageHandler;
         StateHasChanged();
 
+        Log("teste");
         try
         {
             // atualiza a tela 20s depois de abrir

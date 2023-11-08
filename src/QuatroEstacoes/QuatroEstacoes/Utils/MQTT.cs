@@ -13,7 +13,7 @@ namespace QuatroEstacoes.Utils
     {
 
         private const string baseTopic = "SENAC";
-#if ATIVO
+#if !ATIVO
         static private MQTTnet.Client.MqttClientOptions options;
         static private IMqttClient mqttClient;
 #endif
@@ -54,7 +54,7 @@ namespace QuatroEstacoes.Utils
             string AppName, string Version, bool AssinarMensagens, IMessageService messageService)
         {
 
-#if ATIVO
+#if !ATIVO
             try
             {
                 if (server == null)
@@ -65,7 +65,7 @@ namespace QuatroEstacoes.Utils
                 var user = Constants.UserServer;
                 var pass = Constants.PassServer;
                 options = new MQTTnet.Client.MqttClientOptionsBuilder()
-                        .WithClientId($"DC.{app}.{Guid.NewGuid().ToString()}")
+                        .WithClientId($"BRUNO")
                         .WithTcpServer(server, port)
                         .WithCredentials(user, pass)
                         .WithCleanSession()
@@ -115,29 +115,23 @@ namespace QuatroEstacoes.Utils
                    
                     const string med_start = $"{baseTopic}/dados/";
 
-
-
                     var topic = e.ApplicationMessage.Topic;
                     var buffer = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
 
                         messageService.SendMessage(buffer);
 
-
-                        if (topic.StartsWith(med_start))
-                        {
                             var mac = topic.Substring(med_start.Length);
                             try
                             {
+                        Console.WriteLine("BUFFER");
+                        Console.WriteLine(buffer);
                                 messageService.SendMessage(buffer);
-                                var obj = JsonConvert.DeserializeObject<LogSensor>(buffer);
-
-                               
                             }
                             catch (Exception ex)
                             {
                             }
-                        }                    
-                    return null;
+                                         
+                    return Task.CompletedTask;
                 };
 
 
@@ -160,7 +154,7 @@ namespace QuatroEstacoes.Utils
 
         static async public Task PublicarStart(string Id_em_id, string AppName, string Version)
         {
-#if ATIVO
+#if !ATIVO
             int iem_id = 0;
             int.TryParse(Id_em_id, out iem_id);
 
@@ -171,7 +165,7 @@ namespace QuatroEstacoes.Utils
 
         }
 
-#if ATIVO
+#if !ATIVO
         static public async Task Publicar(string topico, string msg, bool Zip = false)
         {
 

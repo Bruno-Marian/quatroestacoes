@@ -15,7 +15,7 @@ namespace QuatroEstacoes
                 "/#"
             };
             MQTT.TopicosSet(topicos);
-            MQTT.InicializaMQTT("0", "mqtt.sisgel.com", "MAUI", "Senac", "1.0", true, messageService);
+            MQTT.InicializaMQTT("0", "blu.sisgel.com", "MudBlazor", "Senac", "1.0", true, messageService);
         }
     }
 }
