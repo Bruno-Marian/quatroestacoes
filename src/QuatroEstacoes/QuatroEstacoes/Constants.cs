@@ -7,4 +7,5 @@
         public const string PassServer = "Senac";
         public const int PortServer = 41883;
     }
+
 }

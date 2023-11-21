@@ -6,6 +6,19 @@
 #include <Adafruit_AHT10.h>
 #include <ArduinoJson.h>
 
+// Sensor temperatura e humidade
+Adafruit_AHT10 aht;
+String temp1 = "";
+String umid1 = "";
+
+// Sensor de luminosidade
+int pino_a36 = 36;
+int val_pin36 = 0;
+
+// Sensor de chuva
+int pin_a15 = 39;
+int val_pin15 = 0;
+
 //__ Informações do dispositivo
 //__ Variáveis de conexão com o servidor
 String DEVICE_ID;
@@ -19,12 +32,9 @@ char authMeth[] = "Senac";
 char token[] = "Senac";
 String clientId;
 DynamicJsonDocument doc(1024);
-Adafruit_AHT10 aht;
 WiFiClient wifiClient;
 PubSubClient client(server.c_str(), 41883, wifiClient);
 
-String temp1 = "";
-String umid1 = "";
 
 //Função responsável pela conexão ao servidor MQTT
 void connectMQTTServer() {
@@ -65,6 +75,8 @@ void atualizaDados() {
   int tempo = 5000;
 
   if ((millis() - delay1) > tempo) {
+    atualizaEnviaLuminosidade();
+    atualizaEnviaChuva();
     atualizaEnviaTemperaturaHumidade();
   }
   if ((millis() - delay1) >= (tempo + 100)) {
@@ -84,19 +96,47 @@ void atualizaEnviaStart() {
   enviarDados(doc, topicoStart);
 }
 
+void atualizaEnviaLuminosidade() {
+  val_pin36 = analogRead(pino_a36);
+  Serial.print("Luminosidade: ");
+  Serial.println(val_pin36);
+  if (val_pin36 >= 0){
+    doc.clear();
+    doc["luminosidade"] = String(val_pin36);
+    enviarDados(doc, topicoLuminosidade);
+  }
+}
+
+void atualizaEnviaChuva(){
+  val_pin15 = analogRead(pin_a15);
+  Serial.print("Chuva: ");
+  Serial.println(val_pin15);
+  if (val_pin15 > 0){
+    doc.clear();
+    doc["chuva"] = String(val_pin15);
+    enviarDados(doc, topicoChuva);
+  }
+}
+
 void atualizaEnviaTemperaturaHumidade() {
   sensors_event_t humidity, temp;
   aht.getEvent(&humidity, &temp);
+  
+  Serial.print("Temperatura:");
+  Serial.println(temp.temperature);
 
-  if (temp.temperature >= 0) {
+  if (temp.temperature > 0) {
     doc.clear();
     doc["temperatura"] = String(temp.temperature);
     enviarDados(doc, topicoTemperatura);
   }
 
-  if (humidity.relative_humidity >= 0){
+  Serial.print("Humidade:");
+  Serial.println(humidity.relative_humidity);
+
+  if (humidity.relative_humidity > 0){
     doc.clear();
-    doc["humidade"] = String(temp.temperature);
+    doc["humidade"] = String(humidity.relative_humidity);
     enviarDados(doc, topicoHumidade);
   }
 }
@@ -125,11 +165,13 @@ void setup() {
   DEVICE_ID = String(WiFi.macAddress());
   clientId = DEVICE_ID;
   //wifiManager.resetSettings();
-  wifiManager.autoConnect("Zfee");
+  wifiManager.autoConnect("Marian_2.4G"); // ATENÇÃO AUTOCONNECT DESLIGA OS SENSORES QUE USAM A PORTA ANALOGICA NÃO UTILIZAR
 
   connectMQTTServer();
 
   atualizaEnviaStart();
+  pinMode(pino_a36, INPUT);
+  pinMode(pin_a15, INPUT);
 }
 
 void loop() {
