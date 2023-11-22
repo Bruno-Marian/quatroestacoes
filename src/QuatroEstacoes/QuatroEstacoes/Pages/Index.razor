@@ -6,17 +6,24 @@
 @using System.ComponentModel;
 @using QuatroEstacoes.Service;
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Tempo atual</PageTitle>
 <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" />
+<MudGrid Justify="Justify.Center">
+<MudPaper Class="pa-6 ma-2" Style="height:200px; width:380px; border:double;" Elevation="3">
+    <MudGrid Justify="Justify.Center" Spacing="100">
+        <MudIcon Icon="@icons" Size="Size.Large" Class="rounded-lg" />
+    </MudGrid>
+    <br />
+    <MudGrid Justify="Justify.Center">
+        <MudText Align="Align.Center">@chuva</MudText>
+    </MudGrid>
+    <br /><br /><br />
+    <MudGrid Justify="Justify.Center">
+        <MudText Align="Align.Center">Humidade: @humidade %  Temperadura: @temperatura °C</MudText>
+    </MudGrid>
+</MudPaper>
+</MudGrid>
 
-<MudText Typo="Typo.h3" GutterBottom="true">Hello, world!</MudText>
-<MudText Class="mb-8">Welcome to your new app, powered by MudBlazor!</MudText>
-<MudText>@tipoLuminosidade</MudText>
-
-<MudText>Temperadura: @temperatura °C</MudText>
-<MudText>Humidade: @humidade %</MudText>
-<MudText>Chuva: @chuva</MudText>
-<MudAlert Severity="Severity.Normal">You can find documentation and examples on our website here: <MudLink Href="https://mudblazor.com" Typo="Typo.body2" Color="Color.Inherit"><b>www.mudblazor.com</b></MudLink></MudAlert>
 
 @code{
     private bool _isDarkMode;
@@ -33,6 +40,7 @@
     private string temperatura = "0";
     private string humidade = "0";
     private string chuva = "Sem Chuva";
+    private string icons = Icons.Material.Filled.Brightness3;
 
 
     public string msgrecebidas { get; set; }
