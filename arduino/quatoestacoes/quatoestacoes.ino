@@ -164,8 +164,8 @@ void setup() {
   wifiManager.setSaveConfigCallback(saveConfigCallback);
   DEVICE_ID = String(WiFi.macAddress());
   clientId = DEVICE_ID;
-  //wifiManager.resetSettings();
-  wifiManager.autoConnect("Marian_2.4G"); // ATENÇÃO AUTOCONNECT DESLIGA OS SENSORES QUE USAM A PORTA ANALOGICA NÃO UTILIZAR
+  wifiManager.resetSettings();
+  wifiManager.autoConnect("QuatroEstacoes"); // ATENÇÃO AUTOCONNECT DESLIGA OS SENSORES QUE USAM A PORTA ANALOGICA NÃO UTILIZAR
 
   connectMQTTServer();
 

@@ -6,12 +6,13 @@
 @using System.ComponentModel;
 @using QuatroEstacoes.Service;
 
+<link href="https://use.fontawesome.com/releases/v6.4.2/css/all.css" rel="stylesheet">
 <PageTitle>Tempo atual</PageTitle>
 <MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" />
 <MudGrid Justify="Justify.Center">
 <MudPaper Class="pa-6 ma-2" Style="height:200px; width:380px; border:double;" Elevation="3">
     <MudGrid Justify="Justify.Center" Spacing="100">
-        <MudIcon Icon="@icons" Size="Size.Large" Class="rounded-lg" />
+        <MudIcon Icon="@icons" Size="Size.Large" />
     </MudGrid>
     <br />
     <MudGrid Justify="Justify.Center">
@@ -40,7 +41,7 @@
     private string temperatura = "0";
     private string humidade = "0";
     private string chuva = "Sem Chuva";
-    private string icons = Icons.Material.Filled.Brightness3;
+    private string icons = "fas fa-sun";
 
 
     public string msgrecebidas { get; set; }
@@ -196,14 +197,17 @@
             {
                 if (chuvaInt < 1000)
                 {
+                    icons = "fas fa-cloud-showers-heavy";
                     chuva = "Chuva intensa!";
                 }
                 else if (chuvaInt < 2000)
                 {
+                    icons = _isDarkMode ? "fas fa-cloud-moon-rain" : "fas fa-cloud-sun-rain";
                     chuva = "Chuva moderada!";
                 }
                 else
                 {
+                    icons = _isDarkMode ? "fas fa-moon" : "fas fa-sun";
                     chuva = "Sem chuva!";
                 }
             }
